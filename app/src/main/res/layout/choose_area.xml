@@ -3,6 +3,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="#fff">
     <RelativeLayout
         android:layout_width="match_parent"
@@ -17,13 +18,14 @@
             android:textColor="#fff"
             android:textSize="20sp"/>
         <Button
+
             android:id="@+id/back_button"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="15dp"
-            android:background="@drawable/back1"
+            android:background="@drawable/back2"
             />
     </RelativeLayout>
     <ListView

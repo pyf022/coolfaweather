@@ -2,12 +2,16 @@ package android.coolfaweather.com.coolfawealther;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.coolfaweather.com.coolfawealther.db.City;
 import android.coolfaweather.com.coolfawealther.db.County;
 import android.coolfaweather.com.coolfawealther.db.Province;
 import android.coolfaweather.com.coolfawealther.util.HttpUtil;
+import android.coolfaweather.com.coolfawealther.util.LogUtil;
 import android.coolfaweather.com.coolfawealther.util.Utility;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -80,7 +84,7 @@ public class ChooseAreaFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        Log.d(FLAG,"---onCreateView---");
+        LogUtil.d(FLAG,"---onCreateView---");
         View view = inflater.inflate(R.layout.choose_area,container,false);
         titleText = (TextView) view.findViewById(R.id.title_text);
         backButton =(Button)view.findViewById(R.id.back_button);
@@ -93,7 +97,7 @@ public class ChooseAreaFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(FLAG,"--onActivityCreated--");
+        LogUtil.d(FLAG,"--onActivityCreated--");
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {//监听点击选项事件
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -103,6 +107,24 @@ public class ChooseAreaFragment extends Fragment {
                 }else if(currentLevel == LEAVEL_CITY){
                     selectCity = cityList.get(position);
                     quryCounties();
+                }else if(currentLevel==LEAVEL_COUNTY){
+                    selectCounty = countyList.get(position);
+                    String weatherId = selectCounty.getWeatherId();
+                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
+                    editor.putString("weatherId",weatherId);
+                    editor.apply();
+                    if(getActivity() instanceof MainActivity){
+                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                        intent.putExtra("weather_id",weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if( getActivity() instanceof WeatherActivity){
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        activity.drawerLayout.closeDrawers();
+                        activity.swipeRefresh.setRefreshing(true);
+                        activity.requestWeather(weatherId);
+
+                    }
                 }
             }
         });
@@ -123,7 +145,7 @@ public class ChooseAreaFragment extends Fragment {
     查询全国所有省，有限从数据库里查询，如果没有查询到再去服务器上查询
      */
     private void queryProvinces(){
-        Log.d(FLAG,"--queryProvince--");
+        LogUtil.d(FLAG,"--queryProvince--");
         titleText.setText("中国");
         backButton.setVisibility(View.GONE);//省级的页面不需要返回按键
         provinceList = DataSupport.findAll(Province.class);
